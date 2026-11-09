@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/PipeMillPermissions/">
+    <Project Path="src/PipeMillPermissions/PipeMillPermissions.Client/PipeMillPermissions.Client.csproj" />
+    <Project Path="src/PipeMillPermissions/PipeMillPermissions/PipeMillPermissions.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PipeMillPermissions.Tests/PipeMillPermissions.Tests.csproj" />
+  </Folder>
+</Solution>
