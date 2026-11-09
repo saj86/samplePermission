@@ -1,30 +1,6 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">PipeMillPermissions</a>
-    </div>
-</div>
-
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-    </nav>
-</div>
-
+@inject SessionService Session
+<header class="brand"><span class="brand-mark">PM</span><div><strong>فولاد پایا</strong><small>مدیریت عملیات</small></div></header>
+<nav aria-label="منوی اصلی"><NavLink href="/" Match="NavLinkMatch.All">نمای کلی</NavLink>
+@foreach(var group in ClientFeatureCatalog.Modules.GroupBy(x=>x.MenuGroup)){<div class="nav-group">@group.Key</div>@foreach(var module in group.Where(x=>Session.Can($"{x.ResourceId}.list"))){<NavLink href="@module.Route">@module.Title</NavLink>}}
+@if(Session.Can("admin.permissions.read")){<div class="nav-group">مدیریت</div><NavLink href="/admin/permissions">مدیریت دسترسی‌ها</NavLink>}</nav>
+@code { protected override async Task OnInitializedAsync(){Session.Changed+=StateHasChanged;await Session.RefreshAsync();} }

@@ -1,7 +1,5 @@
-﻿@page "/"
-
-<PageTitle>Home</PageTitle>
-
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
+@page "/"
+@inject SessionService Session
+<PageTitle>نمای کلی</PageTitle>
+<div class="hero"><div><span class="eyebrow">مرکز کنترل تولید</span><h1>عملیات کارخانه، شفاف و امن</h1><p>تجهیزات، سفارش‌های تولید و بازرسی‌های کیفیت را با دسترسی‌های دقیق مدیریت کنید.</p></div><div class="hero-stat"><strong>@Session.Current.Permissions.Length</strong><span>دسترسی فعال برای شما</span></div></div>
+<section class="dashboard-grid">@foreach(var module in ClientFeatureCatalog.Modules){<article class="module-card"><span class="module-index">@((Array.IndexOf(ClientFeatureCatalog.Modules,module)+1).ToString("00"))</span><div><small>@module.MenuGroup</small><h2>@module.Title</h2><p>ثبت، جستجو و مدیریت اطلاعات @module.Title</p></div>@if(Session.Can($"{module.ResourceId}.list")){<a class="btn btn-primary" href="@module.Route">ورود به بخش</a>}else{<span class="locked">دسترسی ندارید</span>}</article>}</section>

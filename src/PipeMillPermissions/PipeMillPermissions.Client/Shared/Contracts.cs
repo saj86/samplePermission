@@ -19,6 +19,10 @@ public sealed record ModuleDefinition(string ResourceId, string MenuGroup, strin
 }
 
 public interface IFeatureModule { ModuleDefinition Definition { get; } }
+public static class ClientFeatureCatalog
+{
+    public static readonly ModuleDefinition[] Modules = [new EquipmentModule().Definition, new ProductionOrderModule().Definition, new InspectionModule().Definition];
+}
 
 public sealed class EquipmentModule : IFeatureModule
 {
@@ -45,7 +49,12 @@ public sealed class InspectionModule : IFeatureModule
 
 public sealed record PermissionDto(string Key, string Title, string Module, string Kind, bool Active, bool Granted, string RelatedUi);
 public sealed record SessionDto(bool IsAuthenticated, string? DisplayName, string[] Permissions, string? AntiforgeryToken);
-public sealed record LoginRequest([Required] string UserName, [Required] string Password, string? ReturnUrl);
+public sealed class LoginRequest
+{
+    [Required] public string UserName { get; set; } = "";
+    [Required] public string Password { get; set; } = "";
+    public string? ReturnUrl { get; set; }
+}
 public sealed record GrantRequest(string Role, string PermissionKey, bool Granted);
 public sealed record PagedResult<T>(IReadOnlyList<T> Items, int Total, int Page, int PageSize);
 public sealed record ApiError(string Code, string Message, string TraceId);

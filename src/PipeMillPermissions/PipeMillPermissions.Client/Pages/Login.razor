@@ -1,0 +1,7 @@
+@page "/login"
+@inject HttpClient Http
+@inject SessionService Session
+@inject NavigationManager Navigation
+<PageTitle>ورود</PageTitle>
+<div class="auth-card"><span class="eyebrow">ورود امن</span><h1>به سامانه خوش آمدید</h1><EditForm Model="model" OnValidSubmit="SubmitLogin"><DataAnnotationsValidator/><div class="field"><label for="username">نام کاربری</label><InputText id="username" @bind-Value="model.UserName" autocomplete="username"/><ValidationMessage For="() => model.UserName"/></div><div class="field"><label for="password">گذرواژه</label><InputText id="password" type="password" @bind-Value="model.Password" autocomplete="current-password"/><ValidationMessage For="() => model.Password"/></div>@if(error is not null){<div class="alert alert-danger">@error</div>}<button class="btn btn-primary" disabled="@busy">@(busy?"در حال ورود…":"ورود به سامانه")</button></EditForm></div>
+@code { LoginRequest model=new();string? error;bool busy;async Task SubmitLogin(){busy=true;var r=await Http.PostAsJsonAsync("api/auth/login",model);if(r.IsSuccessStatusCode){await Session.RefreshAsync();Navigation.NavigateTo("/");}else error="نام کاربری یا گذرواژه نادرست است.";busy=false;} }

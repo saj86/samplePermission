@@ -44,7 +44,7 @@ public static class AppSeeder
         var demoPassword = config["DemoAccounts:Password"] ?? Environment.GetEnvironmentVariable("PIPEMILL_DEMO_PASSWORD");
         if (string.IsNullOrWhiteSpace(demoPassword)) return;
         await EnsureUser("admin", "مدیر سامانه", "Administrator"); await EnsureUser("viewer", "کاربر مشاهده‌گر", "Viewer"); await EnsureUser("inspector", "بازرس کیفیت", "Inspector");
-        await Grant("Administrator", db.PermissionCatalog.Where(x => x.Active).Select(x => x.Key).ToArrayAsync());
+        await Grant("Administrator", await db.PermissionCatalog.Where(x => x.Active).Select(x => x.Key).ToArrayAsync());
         await Grant("Viewer", ["equipment.list", "equipment.read", "production-orders.list", "production-orders.read", "inspections.list", "inspections.read"]);
         await Grant("Inspector", ["inspections.list", "inspections.read", "inspections.update", "inspections.approval-history.read"]);
 
@@ -64,15 +64,15 @@ public static class AppSeeder
     }
 }
 
-public sealed class ApiStatusHandler : IStatusCodeHandler
+public static class ApiStatusHandler
 {
     // PERMISSION-ERROR
-    public async ValueTask HandleAsync(StatusCodeContext context)
+    public static async Task HandleAsync(HttpContext httpContext)
     {
-        if (context.HttpContext.Request.Path.StartsWithSegments("/api") && context.HttpContext.Response.StatusCode is 401 or 403)
+        if (httpContext.Request.Path.StartsWithSegments("/api") && httpContext.Response.StatusCode is 401 or 403)
         {
-            var status = context.HttpContext.Response.StatusCode; context.HttpContext.Response.ContentType = "application/problem+json";
-            await context.HttpContext.Response.WriteAsJsonAsync(new ProblemDetails { Status = status, Title = status == 401 ? "برای ادامه وارد سامانه شوید." : "شما اجازه انجام این عملیات را ندارید.", Extensions = { ["code"] = status == 401 ? "authentication_required" : "permission_denied", ["traceId"] = context.HttpContext.TraceIdentifier } });
+            var status = httpContext.Response.StatusCode; httpContext.Response.ContentType = "application/problem+json";
+            await httpContext.Response.WriteAsJsonAsync(new ProblemDetails { Status = status, Title = status == 401 ? "برای ادامه وارد سامانه شوید." : "شما اجازه انجام این عملیات را ندارید.", Extensions = { ["code"] = status == 401 ? "authentication_required" : "permission_denied", ["traceId"] = httpContext.TraceIdentifier } });
         }
     }
 }
