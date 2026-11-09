@@ -15,7 +15,7 @@ builder.Services.AddDbContext<AppDbContext>(o => o.UseSqlite(builder.Configurati
 builder.Services.AddIdentityCore<AppUser>(o => { o.Password.RequiredLength = 10; o.SignIn.RequireConfirmedAccount = false; })
     .AddRoles<IdentityRole>().AddEntityFrameworkStores<AppDbContext>().AddSignInManager();
 builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme).AddIdentityCookies();
-builder.Services.ConfigureApplicationCookie(o => { o.Cookie.Name = "PipeMill.Auth"; o.Cookie.HttpOnly = true; o.Cookie.SameSite = SameSiteMode.Strict; o.SlidingExpiration = true; o.Events = new CookieAuthenticationEvents { OnRedirectToLogin = c => { c.Response.StatusCode = 401; return Task.CompletedTask; }, OnRedirectToAccessDenied = c => { c.Response.StatusCode = 403; return Task.CompletedTask; } }; });
+builder.Services.ConfigureApplicationCookie(o => { o.Cookie.Name = "PipeMill.Auth"; o.Cookie.HttpOnly = true; o.Cookie.SameSite = SameSiteMode.Strict; o.SlidingExpiration = true; o.Events = new CookieAuthenticationEvents { OnRedirectToLogin = c => WriteAuthError(c.HttpContext, 401, "authentication_required", "برای ادامه وارد سامانه شوید."), OnRedirectToAccessDenied = c => WriteAuthError(c.HttpContext, 403, "permission_denied", "شما اجازه انجام این عملیات را ندارید.") }; });
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 var catalog = FeatureCatalog.Discover(typeof(IFeatureModule).Assembly);
@@ -30,5 +30,12 @@ app.UseAntiforgery(); app.MapStaticAssets(); app.MapApplicationApis();
 app.MapRazorComponents<App>().AddInteractiveWebAssemblyRenderMode().AddAdditionalAssemblies(typeof(PipeMillPermissions.Client._Imports).Assembly);
 await AppSeeder.SeedAsync(app.Services, app.Configuration, app.Environment);
 app.Run();
+
+static async Task WriteAuthError(HttpContext context, int status, string code, string title)
+{
+    context.Response.StatusCode = status;
+    context.Response.ContentType = "application/problem+json";
+    await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(new { type = "about:blank", title, status, code, traceId = context.TraceIdentifier }));
+}
 
 public partial class Program { }
